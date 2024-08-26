@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "A Complete eCommerce Nodejs backend ",
   "main": "index.js",
+  "type": "modlue",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "nodemon src/index.js"
   },
   "keywords": [
     "JavaScript",
@@ -12,5 +13,8 @@
     "backend"
   ],
   "author": "Shehroz Ali",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
 }
