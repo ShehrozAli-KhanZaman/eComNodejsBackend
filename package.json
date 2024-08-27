@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "A Complete eCommerce Nodejs backend ",
   "main": "index.js",
-  "type": "modlue",
+  "type": "module",
   "scripts": {
-    "run": "nodemon src/index.js"
+    "dev": "nodemon dotenv/config --experimental-json-modules src/index.js"
   },
   "keywords": [
     "JavaScript",
@@ -15,6 +15,18 @@
   "author": "Shehroz Ali",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cloudinary": "^2.4.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.4",
+    "multer": "^1.4.5-lts.1"
   }
 }
