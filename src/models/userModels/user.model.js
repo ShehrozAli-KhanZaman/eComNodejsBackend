@@ -1,28 +1,28 @@
-import mongoose, { Schema } from 'mongoose';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import mongoose, { Schema } from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
     userName: {
       type: String,
-      required: [true, 'UserName is required'],
+      required: [true, "UserName is required"],
       unique: true,
       trim: true,
       lowercase: true,
       index: true,
-      minlength: [3, 'UserName must be at least 3 characters long'],
-      maxlength: [30, 'UserName must be at most 30 characters long'],
+      minlength: [3, "UserName must be at least 3 characters long"],
+      maxlength: [30, "UserName must be at most 30 characters long"],
     },
     fullName: {
       type: String,
       trim: true,
-      minlength: [3, 'UserName must be at least 3 characters long'],
-      maxlength: [30, 'UserName must be at most 30 characters long'],
+      minlength: [3, "UserName must be at least 3 characters long"],
+      maxlength: [30, "UserName must be at most 30 characters long"],
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
       index: true,
       trim: true,
@@ -30,12 +30,14 @@ const userSchema = new Schema(
     },
     phoneNumber: {
       type: String,
-      unique: true,
+      // unique: true,
+      default: null,
+      // sparse: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 3 characters long'],
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 3 characters long"],
     },
     isAdmin: {
       type: Boolean,
@@ -55,8 +57,8 @@ const userSchema = new Schema(
 
 userSchema.index({ email: 1, userName: 1 });
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 10);
   next();
@@ -92,4 +94,4 @@ userSchema.methods.generateRefreshToken = async function () {
   );
 };
 
-export const User = mongoose.model('User', userSchema);
+export const User = mongoose.model("User", userSchema);
