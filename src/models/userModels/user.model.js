@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import ApiError from "../../utils/ApiError.js";
 
 const userSchema = new Schema(
   {
@@ -65,6 +66,9 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.isPasswordCorrect = async function (password) {
+  if (!password) {
+    throw new ApiError(400, "password is required");
+  }
   return await bcrypt.compare(password, this.password);
 };
 
