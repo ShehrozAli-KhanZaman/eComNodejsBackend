@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import ApiError from "../../utils/ApiError.js";
+import ApiError from "../utils/ApiError.js";
 
 const userSchema = new Schema(
   {
@@ -28,6 +28,12 @@ const userSchema = new Schema(
       index: true,
       trim: true,
       lowercase: true,
+      // validate: {
+      //   validator: function(v) {
+      //       return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v);
+      //   },
+      //   message: props => `${props.value} is not a valid email!`
+      // }
     },
     phoneNumber: {
       type: String,
