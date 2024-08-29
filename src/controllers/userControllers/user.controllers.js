@@ -2,7 +2,9 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import { User } from "../../models/userModels/user.model.js";
 import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
-import uploadOnCloudinary from "../../utils/cloudinary.js";
+import uploadOnCloudinary, {
+  deleteFromCloudinary,
+} from "../../utils/cloudinary.js";
 
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
@@ -34,18 +36,18 @@ const registerUser = asyncHandler(async (req, res) => {
   // Get Avatar from user
 
   // console.log(req.files?.avatar[0]);
-  //const avatarLocalPath = req.files?.avatar[0].path;
-  // if (!avatarLocalPath) {
-  //   throw new ApiError(400, "Avatar Not Found");
-  // }
+  const avatarLocalPath = req.files?.avatar[0].path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar Not Found");
+  }
 
   // Upload on Cloudinary
 
-  // const avatar = await uploadOnCloudinary(avatarLocalPath);
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
   // console.log("this is the avatar", avatar);
-  // if (!avatar) {
-  //   throw new ApiError(400, "Error While Uploading Avatar To Cloud");
-  // }
+  if (!avatar) {
+    throw new ApiError(400, "Error While Uploading Avatar To Cloud");
+  }
 
   const user = await User.create({
     userName: userName.toLowerCase(),
@@ -275,8 +277,27 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  // TODO : delete avatar
+  // delete and update avatar
 
+  const existedUserImage = await User.findById(req.user?._id);
+  // console.log(existedUserImage);
+
+  // check if user already have avatar then delete it
+  if (!existedUserImage.avatar) {
+    // throw new ApiError(404, "image not found on cloudinary");
+  } else {
+    const localPathOnCloud = existedUserImage.avatar.split("/").pop();
+
+    // console.log(localPathOnCloud);
+
+    const fileName = localPathOnCloud.split(".");
+
+    const deleteOldAvatar = await deleteFromCloudinary(fileName[0]);
+
+    console.log("image deletion result: ", deleteOldAvatar);
+  }
+
+  // upload new avatar after deletion
   const avatarLocalPath = req.file?.path;
   if (!avatarLocalPath) {
     throw new ApiError(400, "avatar file not found");
