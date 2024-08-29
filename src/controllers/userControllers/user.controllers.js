@@ -5,6 +5,7 @@ import ApiResponse from "../../utils/ApiResponse.js";
 import uploadOnCloudinary, {
   deleteFromCloudinary,
 } from "../../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
@@ -107,6 +108,61 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 };
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  // get refresh token and access token from req
+  // decode the token to get user
+  // check user with id from decoded info
+  // check refresh tokens from req and from user
+  // update the refresh token and return
+
+  const incomingRefreshToken =
+    req.cookies?.refreshToken || req.body?.refreshToken;
+  // console.log(incomingRefreshToken);
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "unauthorized access");
+  }
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+
+    const user = await User.findById(decodedToken?._id);
+    if (!user) {
+      throw new ApiError(401, "invalid user token");
+    }
+
+    if (incomingRefreshToken !== user.refreshToken) {
+      throw new ApiError(401, "refresh token expired");
+    }
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user?._id,
+    );
+
+    const Options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, Options)
+      .cookie("refreshToken", refreshToken, Options)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, refreshToken },
+          "access token refreshed successfully",
+        ),
+      );
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(401, error?.message || "invalid refresh token");
+  }
+});
+
 const loginUser = asyncHandler(async (req, res) => {
   // get data from req body
   // check username & email
@@ -116,7 +172,7 @@ const loginUser = asyncHandler(async (req, res) => {
   // send cookies
 
   const { userName, email, password } = req.body;
-  console.log(userName, email, password);
+  // console.log(userName, email, password);
 
   if ([userName, email, password].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "username, email and password fields are required");
@@ -331,4 +387,5 @@ export {
   getCurrentUser,
   changeCurrentPassword,
   updateUserAvatar,
+  refreshAccessToken,
 };

@@ -8,12 +8,14 @@ import {
   updateAccountDetails,
   changeCurrentPassword,
   updateUserAvatar,
+  refreshAccessToken,
 } from "../../controllers/userControllers/user.controllers.js";
 import upload from "../../middlewares/multer.middleware.js";
 import verifyJwt from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 
+// unauthorized routes
 router.route("/register").post(
   upload.fields([
     {
@@ -23,16 +25,17 @@ router.route("/register").post(
   ]),
   registerUser,
 );
-
 router.route("/login").post(loginUser);
 
 // Authentication routes
 router.route("/logout").post(verifyJwt, logoutUser);
-router.route("/current-user").post(verifyJwt, getCurrentUser);
+router.route("/refresh-token").post(refreshAccessToken);
+router.route("/current-user").get(verifyJwt, getCurrentUser);
 router.route("/delete-account").post(verifyJwt, deleteUserAccount);
-router.route("/update-account").post(verifyJwt, updateAccountDetails);
+router.route("/update-account").patch(verifyJwt, updateAccountDetails);
 router.route("/change-password").post(verifyJwt, changeCurrentPassword);
 router
   .route("/avatar")
   .patch(verifyJwt, upload.single("avatar"), updateUserAvatar);
+
 export default router;
