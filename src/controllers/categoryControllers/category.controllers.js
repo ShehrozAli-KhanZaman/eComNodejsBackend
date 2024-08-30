@@ -62,4 +62,15 @@ const updateCategory = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, category, "category updated successfully"));
 });
 
-export { addCategory, updateCategory };
+const getAllCategory = asyncHandler(async (req, res) => {
+  const categories = await Category.find({}).select("-__v");
+  if (!categories) {
+    throw new ApiError(404, "categories not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, categories, "categories fetched successfully"));
+});
+
+export { addCategory, updateCategory, getAllCategory };
