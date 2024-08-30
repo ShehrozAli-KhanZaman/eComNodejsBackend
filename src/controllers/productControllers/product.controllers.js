@@ -80,4 +80,38 @@ const addProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdProduct, "product added successfully"));
 });
 
-export { addProduct };
+const deleteProduct = asyncHandler(async (req, res) => {
+  // check id in req body
+  const _id = req.body;
+  if (!_id) {
+    throw new ApiError(409, "product id is missing");
+  }
+  // console.log(req.user?._id.toString());
+
+  // this is advance check that if user requested to delete product is same with one associated with product
+  const productOwner = await Product.findById(_id);
+
+  // console.log(
+  //   "this is the user/owner of product",
+  //   productOwner?.owner?._id.toString(),
+  // );
+
+  if (productOwner?.owner?._id.toString() !== req.user?._id.toString()) {
+    throw new ApiError(
+      403,
+      "you do not have permission to modify this product or owner not matched",
+    );
+  }
+
+  // check respective product with id
+  const product = await Product.findByIdAndDelete(_id);
+  if (!product) {
+    throw new ApiError(404, `product with this id  ${_id} not found`);
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, product, "product deleted successfully"));
+});
+
+export { addProduct, deleteProduct };
