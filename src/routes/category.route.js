@@ -1,6 +1,9 @@
 import { Router } from "express";
 import verifyJwt from "../middlewares/auth.middleware.js";
-import { addCategory } from "../controllers/categoryControllers/category.controllers.js";
+import {
+  addCategory,
+  updateCategory,
+} from "../controllers/categoryControllers/category.controllers.js";
 
 const router = Router();
 
@@ -8,5 +11,6 @@ const router = Router();
 router.use(verifyJwt);
 
 router.route("/add-category").post(addCategory);
+router.route("/update-category").patch(updateCategory);
 
 export default router;

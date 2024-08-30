@@ -28,4 +28,38 @@ const addCategory = asyncHandler(async (req, res) => {
     );
 });
 
-export { addCategory };
+const updateCategory = asyncHandler(async (req, res) => {
+  // fetch data from req body
+  // check for existing category
+  // if not found then send not found
+  // search and update category
+  // return res
+
+  const { _id, name, description, slug } = req.body;
+  if ([_id, name].some((field) => field?.trim() === "")) {
+    throw new ApiError(401, "category _id or name required");
+  }
+
+  if (!_id || !name) {
+    throw new ApiError(401, "category _id and name are required");
+  }
+
+  const category = await Category.findByIdAndUpdate(
+    _id,
+    {
+      name: name.toLowerCase(),
+      description,
+      slug,
+    },
+    { new: true },
+  ).select("-__v");
+  if (!category) {
+    throw new ApiError(404, "category does not exist");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, category, "category updated successfully"));
+});
+
+export { addCategory, updateCategory };
