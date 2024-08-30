@@ -73,4 +73,32 @@ const getAllCategory = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, categories, "categories fetched successfully"));
 });
 
-export { addCategory, updateCategory, getAllCategory };
+const getCategoryByIdOrName = asyncHandler(async (req, res) => {
+  const { _id, name } = req.body;
+  if (!_id && !name) {
+    throw new ApiError(401, "category _id or name required");
+  }
+  if (_id) {
+    const category = await Category.findById(_id).select("-__v");
+    if (!category) {
+      throw new ApiError(404, `category with this id ${_id} not exist`);
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, category, `${_id} category fetched successfully`),
+      );
+  } else {
+    const category = await Category.find({ name }).select("-__v");
+    if (!category[0]) {
+      throw new ApiError(404, `category with this name ${name} not exist`);
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, category, `${name} category fetched successfully`),
+      );
+  }
+});
+
+export { addCategory, updateCategory, getAllCategory, getCategoryByIdOrName };
