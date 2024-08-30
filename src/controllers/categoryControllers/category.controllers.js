@@ -101,4 +101,32 @@ const getCategoryByIdOrName = asyncHandler(async (req, res) => {
   }
 });
 
-export { addCategory, updateCategory, getAllCategory, getCategoryByIdOrName };
+const deleteCategory = asyncHandler(async (req, res) => {
+  const _id = req.body?._id;
+  if (!_id) {
+    throw new ApiError(409, "category _id is missing");
+  }
+
+  const deletedCategory = await Category.findByIdAndDelete(_id);
+  if (!deletedCategory) {
+    throw new ApiError(404, `category with this id ${_id} not exist`);
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        deletedCategory,
+        `${_id} category deleted successfully`,
+      ),
+    );
+});
+
+export {
+  addCategory,
+  updateCategory,
+  getAllCategory,
+  getCategoryByIdOrName,
+  deleteCategory,
+};
