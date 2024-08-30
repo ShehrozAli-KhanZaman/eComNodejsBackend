@@ -31,7 +31,7 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJwt, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 router.route("/current-user").get(verifyJwt, getCurrentUser);
-router.route("/delete-account").post(verifyJwt, deleteUserAccount);
+router.route("/delete-account").delete(verifyJwt, deleteUserAccount);
 router.route("/update-account").patch(verifyJwt, updateAccountDetails);
 router.route("/change-password").post(verifyJwt, changeCurrentPassword);
 router

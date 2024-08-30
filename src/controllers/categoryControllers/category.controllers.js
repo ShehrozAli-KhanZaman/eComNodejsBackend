@@ -123,10 +123,48 @@ const deleteCategory = asyncHandler(async (req, res) => {
     );
 });
 
+const addMultipleCategories = asyncHandler(async (req, res) => {
+  const categories = req.body?.categories;
+  if (!Array.isArray(categories) || categories.length === 0) {
+    throw new ApiError(400, "categories array is required and cannot be empty");
+  }
+
+  const newCategories = [];
+  for (const categoryData of categories) {
+    const { name, description, slug } = categoryData;
+    if (!name) {
+      throw new ApiError(401, "category name is missing");
+    }
+
+    const existedCategory = await Category.findOne({ name });
+    if (existedCategory) {
+      throw new ApiError(409, `category with name ${name} already exists`);
+    }
+
+    const category = await Category.create({
+      name: name.toLowerCase(),
+      description,
+      slug,
+    });
+
+    newCategories.push(category);
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        newCategories,
+        `${newCategories.length} categories created successfully`,
+      ),
+    );
+});
+
 export {
   addCategory,
   updateCategory,
   getAllCategory,
   getCategoryByIdOrName,
   deleteCategory,
+  addMultipleCategories,
 };
