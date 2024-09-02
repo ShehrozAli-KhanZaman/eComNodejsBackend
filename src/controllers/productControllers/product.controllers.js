@@ -114,4 +114,73 @@ const deleteProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, "product deleted successfully"));
 });
 
-export { addProduct, deleteProduct };
+const getAllProduct = asyncHandler(async (req, res) => {
+  const { page, limit } = req.body;
+  const products = await Product.find({}).select("-__v");
+  if (!products) {
+    throw new ApiError(404, "no products found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, products, "products fetched successfully"));
+});
+
+const updateProduct = asyncHandler(async (req, res) => {
+  // get data from req body and check for name and desc
+  const { _id, name, description, price, stock, brand, category, ratings } =
+    req.body;
+  const owner = req.user?._id;
+  if (!_id || !name || !description) {
+    throw new ApiError(409, "product name, _id or description is missing");
+  }
+
+  // check category
+  const categoryId = mongoose.Types.ObjectId.isValid(category);
+  const categoryData = categoryId
+    ? await Category.findById(categoryId)
+    : await Category.findOne({ name: category });
+
+  // check category data exists or not
+  if (!categoryData) {
+    throw new ApiError(409, `category ${category} does not exists`);
+  }
+
+  // check for user id
+  if (!owner) {
+    throw new ApiError(409, "user id is required");
+  }
+  const user = await User.findById(owner);
+  if (!user || user?._id.toString() !== owner.toString()) {
+    throw new ApiError(409, "user not found or user id not matched");
+  }
+
+  //check the product exits or not
+  const existingProduct = await Product.findById(_id);
+  if (!existingProduct) {
+    throw new ApiError(409, `product with id ${_id} not exist`);
+  }
+
+  //update the product
+  const updatedProduct = await Product.findByIdAndUpdate(
+    _id,
+    {
+      name: name.toLowerCase(),
+      description,
+      price,
+      stock,
+      brand,
+      ratings,
+    },
+    { new: true },
+  ).select("-__v");
+
+  if (!updatedProduct) {
+    throw new ApiError(409, "something went wrong while updating product");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedProduct, "product updated successfully"));
+});
+
+export { addProduct, deleteProduct, getAllProduct, updateProduct };
