@@ -9,7 +9,7 @@ import {
   changeCurrentPassword,
   updateUserAvatar,
   refreshAccessToken,
-} from "../controllers/userControllers/user.controllers.js";
+} from "../controllers/user.controllers.js";
 import upload from "../middlewares/multer.middleware.js";
 import verifyJwt from "../middlewares/auth.middleware.js";
 

@@ -1,9 +1,10 @@
-import asyncHandler from "../../utils/asyncHandler.js";
-import ApiResponse from "../../utils/ApiResponse.js";
-import ApiError from "../../utils/ApiError.js";
-import { Order } from "../../models/order.model.js";
-import { Product } from "../../models/product.model.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import ApiError from "../utils/ApiError.js";
+import { Order } from "../models/order.model.js";
+import { Product } from "../models/product.model.js";
 
+// create order
 const placeOrder = asyncHandler(async (req, res) => {
   const user = req?.user?._id;
   const {
@@ -87,6 +88,7 @@ const placeOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, order, "order placed successfully"));
 });
 
+// read order
 const getOrder = asyncHandler(async (req, res) => {
   const user = req?.user?._id;
   const orders = await Order.find({ user: user.toString() });
@@ -98,6 +100,7 @@ const getOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, orders, "orders fetched successfully"));
 });
 
+// update order
 const updateOrder = asyncHandler(async (req, res) => {
   const {
     _id,
@@ -170,6 +173,7 @@ const updateOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedOrder, "order updated successfully"));
 });
 
+// delete order
 const deleteOrder = asyncHandler(async (req, res) => {
   const { orderId, itemId } = req?.query;
   if (!orderId) {
