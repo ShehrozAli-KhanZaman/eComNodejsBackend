@@ -98,4 +98,76 @@ const getOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, orders, "orders fetched successfully"));
 });
 
-export { placeOrder, getOrder };
+const updateOrder = asyncHandler(async (req, res) => {
+  const {
+    _id,
+    orderItems,
+    shippingAddress,
+    shippingPrice,
+    taxPrice,
+    itemsPrice,
+    totalPrice,
+    paymentMethod,
+    isPaid,
+    orderStatus,
+  } = req?.body;
+
+  if (!_id) {
+    throw new ApiError(401, "order id is required");
+  }
+
+  const existingOrder = await Order.findById(_id);
+  if (!existingOrder) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  if (!Array.isArray(orderItems) || orderItems.length === 0) {
+    throw new ApiError(
+      401,
+      "order items array is required and cannot be empty",
+    );
+  }
+
+  orderItems.forEach((item) => {
+    if (item.price <= 0 || item.quantity <= 0) {
+      throw new ApiError(401, "Item price or quantity must be greater than 0");
+    }
+
+    const orderItemIndex = existingOrder.orderItems.findIndex(
+      (existingItem) => {
+        // console.log(existingItem._id.toString());
+        return existingItem._id.toString() === item._id;
+      },
+    );
+    // console.log(orderItemIndex);
+    // console.log(item._id);
+    if (orderItemIndex >= 0) {
+      // If item is found, update specific fields
+      existingOrder.orderItems[orderItemIndex].name = item.name;
+      existingOrder.orderItems[orderItemIndex].price = item.price;
+      existingOrder.orderItems[orderItemIndex].quantity = item.quantity;
+    } else {
+      throw new ApiError(404, `Order item with ID ${item._id} not found`);
+    }
+  });
+
+  existingOrder.shippingAddress =
+    shippingAddress || existingOrder.shippingAddress;
+  existingOrder.shippingPrice = shippingPrice || existingOrder.shippingPrice;
+  existingOrder.taxPrice = taxPrice || existingOrder.taxPrice;
+  existingOrder.itemsPrice = itemsPrice || existingOrder.itemsPrice;
+  existingOrder.totalPrice = totalPrice || existingOrder.totalPrice;
+  existingOrder.paymentMethod = paymentMethod || existingOrder.paymentMethod;
+  existingOrder.isPaid = isPaid !== undefined ? isPaid : existingOrder.isPaid;
+  existingOrder.orderStatus = orderStatus || existingOrder.orderStatus;
+
+  const updatedOrder = await existingOrder.save();
+  if (!updatedOrder) {
+    throw new ApiError(409, "something went wrong while updating order");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedOrder, "order updated successfully"));
+});
+
+export { placeOrder, getOrder, updateOrder };
