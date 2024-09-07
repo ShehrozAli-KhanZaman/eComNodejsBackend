@@ -170,4 +170,45 @@ const updateOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedOrder, "order updated successfully"));
 });
 
-export { placeOrder, getOrder, updateOrder };
+const deleteOrder = asyncHandler(async (req, res) => {
+  const { orderId, itemId } = req?.query;
+  if (!orderId) {
+    throw new ApiError(401, "order id is required");
+  }
+
+  // case 1 : for deleting items in order
+  if (itemId) {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      { _id: orderId },
+      {
+        $pull: { orderItems: { _id: itemId } },
+      },
+      { new: true },
+    );
+
+    if (!updatedOrder) {
+      throw new ApiError(401, "order or item not found");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updatedOrder, "order item deleted successfully"),
+      );
+  }
+
+  // case 2 : for deleting whole order
+  if (!itemId) {
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+
+    if (!deletedOrder) {
+      throw new ApiError(409, "something went wrong while deleting order");
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, deletedOrder, "order deleted successfully"));
+  }
+});
+
+export { placeOrder, getOrder, updateOrder, deleteOrder };
