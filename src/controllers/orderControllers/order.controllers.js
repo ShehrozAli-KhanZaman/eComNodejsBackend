@@ -87,4 +87,15 @@ const placeOrder = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, order, "order placed successfully"));
 });
 
-export { placeOrder };
+const getOrder = asyncHandler(async (req, res) => {
+  const user = req?.user?._id;
+  const orders = await Order.find({ user: user.toString() });
+  if (!orders) {
+    throw new ApiError(401, "no order found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, orders, "orders fetched successfully"));
+});
+
+export { placeOrder, getOrder };
